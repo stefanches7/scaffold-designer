@@ -101,7 +101,7 @@ const App: React.FC = () => {
             const count = params.materialCount || 1;
             for (let i = 0; i < count; i++) {
                 drawScaffold(ctx, params, { materialIndex: i, preview: false });
-                const filename = count > 1 ? `${params.name}_mat${i+1}_gptfirmwarefix.stl` : `${params.name}_gptfirmwarefix.stl`;
+                const filename = count > 1 ? `${params.name}_mat${i+1}.stl` : `${params.name}.stl`;
                 exportToSTL(exportCanvas, params, filename);
             }
         }
