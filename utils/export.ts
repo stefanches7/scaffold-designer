@@ -68,12 +68,12 @@ export function exportToSTL(canvas: HTMLCanvasElement, params: ScaffoldParams, f
       const wx = x * scaleX;
       const wy = (canvasHeight - 1 - y) * scaleY; // Invert Y
 
-      // Top face
+      // Top face (CCW when viewed from +Z produces an outward +Z normal)
       const p5 = [wx, wy, h];
       const p6 = [wx + scaleX, wy, h];
       const p7 = [wx + scaleX, wy + scaleY, h];
       const p8 = [wx, wy + scaleY, h];
-      addQuad(p8, p7, p6, p5);
+      addQuad(p5, p6, p7, p8);
       
       // Get neighbor heights
       const h_left = x > 0 ? heights[x - 1][y] : 0;
@@ -81,22 +81,13 @@ export function exportToSTL(canvas: HTMLCanvasElement, params: ScaffoldParams, f
       const h_front = y > 0 ? heights[x][y - 1] : 0; // Inverted Y
       const h_back = y < canvasHeight - 1 ? heights[x][y + 1] : 0; // Inverted Y
       
-      // Bottom face (only if it's the start of material)
-      if(h > 0) {
-        let isEdge = h_left === 0 || h_right === 0 || h_front === 0 || h_back === 0;
-         if(!isEdge){
-             const h_min_neighbor = Math.min(h_left, h_right, h_front, h_back);
-             if(h > h_min_neighbor) isEdge = true; // on an internal cliff
-         }
-
-        if(isEdge) { // crude check for exposed bottom faces
-            const p1 = [wx, wy, 0];
-            const p2 = [wx + scaleX, wy, 0];
-            const p3 = [wx + scaleX, wy + scaleY, 0];
-            const p4 = [wx, wy + scaleY, 0];
-            addQuad(p1, p2, p3, p4);
-        }
-      }
+      // Bottom face – always emitted for every solid pixel so the z=0 base is
+      // fully closed (CW when viewed from +Z produces an outward -Z normal)
+      const p1 = [wx, wy, 0];
+      const p2 = [wx + scaleX, wy, 0];
+      const p3 = [wx + scaleX, wy + scaleY, 0];
+      const p4 = [wx, wy + scaleY, 0];
+      addQuad(p4, p3, p2, p1);
 
       // Left face wall
       if (h > h_left) {
